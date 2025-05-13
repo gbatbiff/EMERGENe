@@ -1,4 +1,4 @@
-# Emergene - an ancestral state coalescent based framework to estimate emergence rate of bacterial traits of epidemiological interest 
+# Emergene - ## an ancestral state coalescent based framework to estimate emergence rate of bacterial traits of epidemiological interest 
 
 ## Introduction
 This package estimates the emergence rate of traits of epidemiological interest pairing ancestral state reconstruction and coalescence theory.
