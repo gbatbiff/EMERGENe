@@ -1,0 +1,8 @@
+# Emergene - an ancestral state coalescent based framework to estimate emergence rate of bacterial traits of epidemiological interest 
+
+## Introduction
+This package estimates the emergence rate of traits of epidemiological interest pairing ancestral state reconstruction and coalescence theory.
+
+## Pipeline description
+
+1) The Emergene works through two main steps: i) an ancestral state reconstruction is performed to spot the internal parent nodes that experienced a shift in the states i.e. when a trait is gained i
