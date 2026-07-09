@@ -9,4 +9,4 @@ This package estimates the emergence rate of traits of epidemiological interest 
 - Once that the history of a trait is reconstructed, the number of introductions of the trait across the population are detected, intended as Polyphyletic event
 - Once a parent node is detected, its children node with opposite state become the MRCA and a sub-tree is generated. Then, the Entry rate is calculated based on
   the branch distance between the parent node and its child with opposite state i.e. branch duration associated with the trait introduction, where a transition between       demes occurs
-- Finally, the Emergence Rate is computed, indicating the propagation time of the trait in the population that descend from the initial node that experienced a shift         between the states. (See Method on paper for details) 
+- Finally, the Emergence Rate is computed, indicating the propagation time of the trait in the population that descend from the initial node that experienced a shift         between the states. (See Methods for details) 
