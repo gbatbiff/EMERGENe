@@ -5,7 +5,7 @@ This package estimates the emergence rate of traits of epidemiological interest 
 
 ## Pipeline description
 
-- An ancestral state reconstruction is performed through stochastic character mapping using the ”make.simmap” function from the R package ”phytools” (Revell L, 2024).        Internal phylogeentic tree nodes that experienced a shift between the states i.e. when a trait is gained are spotted.
+- An ancestral state reconstruction is performed through stochastic character mapping using the ”make.simmap” function from the R package ”phytools” (Revell L, 2024).        Internal phylogenetic tree nodes that experienced a shift between the states i.e. when a trait is gained are spotted.
 - Once that the history of a trait is reconstructed, the number of introductions of the trait across the population are detected, intended as Polyphyletic event
 - Once a parent node is detected, its children node with opposite state become the MRCA and a sub-tree is generated. Then, the Entry rate is calculated based on
   the branch distance between the parent node and its child with opposite state i.e. branch duration associated with the trait introduction, where a transition between       demes occurs
