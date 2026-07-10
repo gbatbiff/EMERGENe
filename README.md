@@ -10,3 +10,36 @@ This package estimates the emergence rate of traits of epidemiological interest 
 - Once a parent node is detected, its children node with opposite state become the MRCA and a sub-tree is generated. Then, the Entry rate is calculated based on
   the branch distance between the parent node and its child with opposite state i.e. branch duration associated with the trait introduction, where a transition between       demes occurs
 - Finally, the Emergence Rate is computed, indicating the propagation time of the trait in the population that descend from the initial node that experienced a shift         between the states. (See Methods for details) 
+
+## Installation
+### Requirements
+- Linux-based OS
+- conda 
+
+### Installation command
+
+```bash
+git clone https://github.com/gbatbiff/Emergene.git
+cd Emergene/
+conda env create -f environment.yml
+conda activate Emergene
+```
+## Quick guide
+
+The command with default settings is:
+```bash
+Rscript Emergene.R -t [treefile] -amr [AMRFinderPlus_output_table]
+```
+
+### Test run
+
+
+## Notes
+The tree labels have to match the strain name of AMRFinder output table 
+
+
+## Coming soon
+
+
+### Citation
+
