@@ -25,6 +25,7 @@ conda env create -f environment.yml
 conda activate Emergene
 ```
 ## Quick guide
+The standard inputs are a time scaled phylogenetic tree (Bacdating, BEAST...), and the output from AMRFinder
 
 The command with default settings is:
 ```bash
