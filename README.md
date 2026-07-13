@@ -33,6 +33,9 @@ Rscript Emergene.R -t [treefile] -amr [AMRFinderPlus_output_table]
 ```
 
 ### Test run
+```bash
+Rscript Emergene.R -t data/treefile.nwk -amr data/AMRFinder.txt
+```
 
 
 ## Notes
