@@ -40,7 +40,7 @@ Rscript emergene_test_run.R -t test/phylo/tree.nex -amr test/metadata/amr.csv
 ## Notes
 The tree labels have to match the strain name of AMRFinder output table 
 
-## Filtering EMERGENe output
+## EMERGENe output summary
 The EMERGENe script generates single outputs for each gene screened from AMRFinder results with the main following attributes:
 
 - `amr` - resistance/virulence genes identified by AMRFinder
@@ -55,6 +55,7 @@ The EMERGENe script generates single outputs for each gene screened from AMRFind
 - `poly_parent_state_prob` - ancestral state probability of character assignment (Default >0.8)
 - `emergence_rate` - post-introduction trait propagation (see method section for details)
 
+## Output processing
 
 ### Citation
 
