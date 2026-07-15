@@ -34,7 +34,7 @@ Rscript Emergene.R -t [treefile] -amr [AMRFinderPlus_output_table]
 
 ### Test run
 ```bash
-Rscript emergene_test_run.R -t test/tree.nex -amr test/amr.csv
+Rscript emergene_test_run.R -t test/phylo/tree.nex -amr test/metadata/amr.csv
 ```
 
 ## Notes
