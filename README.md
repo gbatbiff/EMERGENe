@@ -44,7 +44,7 @@ The tree labels have to match the strain name of AMRFinder output table
 ## Filtering EMERGENe output
 The EMERGENe script generates single outputs for each gene screened from AMRFinder results with the main following attributes:
 
-- `amr`
+- `amr` - resistance/virulence genes identified by AMRFinder
 - `node_lineages` - number of internal nodes descendants that gained the trait
 - `tip_lineages` - number of terminal tips descendants that gained the trait
 - `poly_parent` - internal node that experienced a polyphyletic event i.e. a shift between states where a trait is gained
