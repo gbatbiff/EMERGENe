@@ -34,9 +34,8 @@ Rscript Emergene.R -t [treefile] -amr [AMRFinderPlus_output_table]
 
 ### Test run
 ```bash
-Rscript Emergene.R -t data/treefile.nwk -amr data/AMRFinder.txt
+Rscript emergene_test_run.R -t test/tree.nex -amr test/amr.csv
 ```
-
 
 ## Notes
 The tree labels have to match the strain name of AMRFinder output table 
