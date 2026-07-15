@@ -976,7 +976,3 @@ for (amr in nmost) {
   
   
 } #amr pool
-
-
-# aa<-read.csv("github_try/blaCTX-M-15_inloop.csv")
-# aa<-aa[which(aa$tip_lineages>=1 & aa$poly_parent_state_prob>=0.8),]
