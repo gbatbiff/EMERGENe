@@ -56,6 +56,11 @@ The EMERGENe script generates single outputs for each gene screened from AMRFind
 - `emergence_rate` - post-introduction trait propagation (see method section for details)
 
 ## Output processing
+Rscript to merge and filter multiple outputs for easy visualization through ggplot2
+```bash
+Rscript processing_EMERGENe.R [output_folder]
+```
+
 
 ### Citation
 
