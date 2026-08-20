@@ -7,14 +7,17 @@ packages <- c(
   "R.utils",
   "openxlsx",
   "ape",
-  "treeio",
-  "ggtree",
   "phytools",
   "TreeTools"
 )
 
+missing_packages <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_packages) > 0) {
+  stop("Missing required R package(s): ", paste(missing_packages, collapse = ", "),
+       ". Create/update the EMERGENe Conda environment from environment.yml.")
+}
 invisible(lapply(packages, function(pkg) {
-  suppressMessages(suppressWarnings(library(pkg, character.only = TRUE)))
+  suppressMessages(library(pkg, character.only = TRUE))
 }))
 
 
@@ -45,7 +48,7 @@ for (i in 1:length(args)) {
     amr_table_file <- args[i + 1]
     input_type <- "amrfinder"
   }
-  if (args[i] == "-tree" && i + 1 <= length(args)) {
+  if (args[i] %in% c("-tree", "-t") && i + 1 <= length(args)) {
     tree_file <- args[i + 1]
   }
 }
@@ -229,12 +232,6 @@ for (amr in cols) {
     ancstats<-rbind.data.frame(ancstats_tips, ancstats_nodes)
     
     
-    cols<-setNames(c("red", "blue"), c("S","R")) ### SOSTITUIRE CON R/S
-    
-    ff<-data.frame(label = names(xx), stat = as.factor(xx) )
-    ff<-unique(ff)
-    tree2 <- full_join(tree, ff, by="label")
-    
     node_dt_1 <- data.table(name = rownames(ancstats),
                             pheno = ifelse(ancstats[, "R"] >= ancstats[, "S"], "R", "S"))
     
@@ -291,7 +288,7 @@ for (amr in cols) {
             
             if (length(check_R_child) == 2) {
               # If there are R children, store the parent of the MRCA of those children
-              poly_parents_with_R_descendant[n] <- parent(tree, getMRCA(tree, check_R_child))
+              poly_parents_with_R_descendant[n] <- getParent(tree, getMRCA(tree, check_R_child))
               
             } 
             
@@ -306,13 +303,13 @@ for (amr in cols) {
               
               if (length(check_R_siblings)>0) {
                 
-                poly_parents_with_R_descendant[n] <- parent(tree, getMRCA(tree, c(check_R_child, Siblings(tree, check_R_child))))
+                poly_parents_with_R_descendant[n] <- getParent(tree, getMRCA(tree, c(check_R_child, Siblings(tree, check_R_child))))
                 
                 
               } else if (c %in% seq_len(length(tree$tip.label)) | c %in% pheno_nodes)  {
                 
                 # If c is a tip, store the parent of that child
-                poly_parents_with_R_descendant[n] <- parent(tree, c)
+                poly_parents_with_R_descendant[n] <- getParent(tree, c)
                 
                 
               } 
@@ -568,13 +565,13 @@ for (amr in cols) {
               
               singletons[k]<-NA
               
-            } else if (parent(tree, singleton1) %in% poly_parents) {
+            } else if (getParent(tree, singleton1) %in% poly_parents) {
               
               singletons[k]<-singleton1
               
               
               
-            } else if (parent(tree, singleton1) %in% poly_parents[k]) {
+            } else if (getParent(tree, singleton1) %in% poly_parents[k]) {
               
               singletons[k]<-singleton1
               
@@ -598,7 +595,7 @@ for (amr in cols) {
               
               singletons[k]<-NA
               
-            } else if (parent(tree, singleton2) %in% poly_parents) {
+            } else if (getParent(tree, singleton2) %in% poly_parents) {
               
               ### if parent of singleton not poly then not in poly_parent_with_terminal leaves but it is singleton 
               singletons[k]<-singleton2
@@ -606,7 +603,7 @@ for (amr in cols) {
               #poly_parents_with_terminal_leaves_dist[k]<-dist_parent_child[which(dist_parent_child[,1]==poly_parents[k] & dist_parent_child[,2]==singleton2),"stat"]
               
               
-            } else if (parent(tree, singleton2) %in% poly_parents[k]) {
+            } else if (getParent(tree, singleton2) %in% poly_parents[k]) {
               
               singletons[k]<-singleton2
               
@@ -693,7 +690,7 @@ for (amr in cols) {
         ###
         poly_parents_with_terminal_leaves_dist<-poly_parents_with_terminal_leaves_dist[!is.na(poly_parents_with_terminal_leaves_dist)]
         
-        poly_parents_granchild_singletons<-parent(tree, single_clust_id)[!parent(tree, single_clust_id) %in% poly_parents] ### 
+        poly_parents_granchild_singletons<-getParent(tree, single_clust_id)[!getParent(tree, single_clust_id) %in% poly_parents] ###
         
         ### ENTRY RATE INCLUDING SINGLETON
         
@@ -707,11 +704,11 @@ for (amr in cols) {
         n_singletons<-length(single_clust_id)
         
         #    singletons<-singletons[!is.na(singletons)]
-        singletons_parent<-parent(tree, singletons)
+        singletons_parent<-getParent(tree, singletons)
         
         
         
-        poly_parents_granchild_singletons<-parent(tree, single_clust_id)[!parent(tree, single_clust_id) %in% poly_parents] ### se i padri dei singleton non sono nei poli parent significa che chi è esclus
+        poly_parents_granchild_singletons<-getParent(tree, single_clust_id)[!getParent(tree, single_clust_id) %in% poly_parents] ### se i padri dei singleton non sono nei poli parent significa che chi è esclus
         
         
         
