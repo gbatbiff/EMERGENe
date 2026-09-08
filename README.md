@@ -29,8 +29,20 @@ The standard inputs are a time scaled phylogenetic tree (Bacdating, BEAST...), a
 
 The command with default settings is:
 ```bash
-Rscript Emergene.R -t [treefile] -amr [AMRFinderPlus_output_table]
+Rscript EMERGENe.R -t [treefile] -amr [AMRFinderPlus_output_table]
 ```
+Filtering options:
+
+```bash
+  -tree <tree_file>               Path to the phylogenetic tree file
+  -amr <amr_table_file>           Path to the AMR table file (AMRFinderPlus)
+  -min_node_state_prob <numeric>  Minimum node state probability of parent node where a phyletic event is detected (default: 0.8)
+  -min_clade_tips <integer>       Minimum number of tips in the clade that descend from parent node (default: 2)
+  -amr_coverage <numeric>         Minimum percentage coverage threshold for AMR genes in AMRFinderPlus (default: 100)
+  -amr_identity <numeric>         Minimum percentage identity threshold for AMR genes in AMRFinderPlus (default: 99)
+  -nsim <integer>                 Number of stochastic simulations in ancestral state reconstruction (default: 100)
+```
+
 
 ### Test run
 ```bash
