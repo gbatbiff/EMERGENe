@@ -74,10 +74,14 @@ The main `summary.csv` output is a table summarising all the events (e.g. multip
 
 ###
 An additional output `aggregated_rates.csv` is provided, showing the cumulative indexes (Phyletic events, Entry rate and Emergence rate) calculated for each trait:
-```bash
-Rscript processing_EMERGENe.R [output_folder]
-```
 
+The analysis produces a table summarizing the detected phyletic events, entry rates, and emergence rates for each trait.
+
+| trait | phyletic_events | entry_rate | emergence_rate |
+|---|---:|---:|---:|
+| `blaCTX-M-15` | 3 | 0.03 | 143.76 |
+| `blaTEM-1` | 1 | 0.004 | 600.54 |
+| `qnrS` | 2 | 0.1 | 38.08 |
 
 ### Citation
 
