@@ -79,9 +79,9 @@ The analysis produces a table summarizing the detected phyletic events, entry ra
 
 | trait | phyletic_events | entry_rate | emergence_rate |
 |---|---:|---:|---:|
-| `blaCTX-M-15` | 3 | 0.03 | 143.76 |
-| `blaTEM-1` | 1 | 0.004 | 600.54 |
-| `qnrS` | 2 | 0.1 | 38.08 |
+| `blaCTX-M-15` | 3 | 21.2 | 143.76 |
+| `blaTEM-1` | 1 | 8.6 | 600.54 |
+| `qnrS` | 2 | 1.8 | 38.08 |
 
 ### Citation
 
