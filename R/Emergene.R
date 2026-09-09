@@ -2,16 +2,18 @@ rm(list = ls())
 
 packages <- c(
   "ggplot2",
+  "ape",
   "phangorn",
   "stringr",
   "data.table",
   "dplyr",
   "R.utils",
   "openxlsx",
-  "ape",
   "phytools",
   "TreeTools"
 )
+
+
 
 missing_packages <- packages[!vapply(packages, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing_packages) > 0) {
@@ -28,9 +30,14 @@ help_message <- "
 Usage: Rscript Emergene.R [options]
 
 Options:
-  -tree <tree_file>          Path to the phylogenetic tree file
-  -amr <amr_table_file>      Path to the AMR table file (for amrfinderplus)
-  --help                     Show this help message and exit
+  -tree <tree_file>               Path to the phylogenetic tree file
+  -amr <amr_table_file>           Path to the AMR table file (AMRFinderPlus)
+  -min_node_state_prob <numeric>  Minimum node state probability of parent node where a phyletic event is detected (default: 0.8)
+  -min_clade_tips <integer>       Minimum number of tips in the clade that descend from parent node (default: 2)
+  -amr_coverage <numeric>         Minimum percentage coverage threshold for AMR genes in AMRFinderPlus (default: 100)
+  -amr_identity <numeric>         Minimum percentage identity threshold for AMR genes in AMRFinderPlus (default: 99)
+  -nsim <integer>                 Number of simulations in the ancestral state reconstruction (default: 100)
+  --help                          Show this help message and exit
 "
 # Show help message if '--help' is passed or arguments are missing
 if ("--help" %in% args || length(args) == 0) {
@@ -38,12 +45,19 @@ if ("--help" %in% args || length(args) == 0) {
   quit(save = "no", status = 0)
 }
 
-# Initialize variables for the arguments
+# Initialize variables for arguments with default values
 amr_table_file <- NULL
 tree_file <- NULL
 input_type <- NULL
 
-# select for '-amr', '-pangenome', and '-tree'
+# Default values
+min_node_state_prob <- 0.8  
+min_clade_tips <- 2         
+amr_coverage <- 100         
+amr_identity <- 99        
+nsim <- 100
+
+# Parse command line arguments
 for (i in 1:length(args)) {
   if (args[i] == "-amr" && i + 1 <= length(args)) {
     amr_table_file <- args[i + 1]
@@ -51,6 +65,21 @@ for (i in 1:length(args)) {
   }
   if (args[i] %in% c("-tree", "-t") && i + 1 <= length(args)) {
     tree_file <- args[i + 1]
+  }
+  if (args[i] %in% c("-min_node_state_prob", "--min_node_state_prob") && i + 1 <= length(args)) {
+    min_node_state_prob <- as.numeric(args[i + 1])
+  }
+  if (args[i] %in% c("-min_clade_tips", "--min_clade_tips") && i + 1 <= length(args)) {
+    min_clade_tips <- as.integer(args[i + 1])
+  }
+  if (args[i] %in% c("-amr_coverage", "--amr_coverage") && i + 1 <= length(args)) {
+    amr_coverage <- as.numeric(args[i + 1])
+  }
+  if (args[i] %in% c("-amr_identity", "--amr_identity") && i + 1 <= length(args)) {
+    amr_identity <- as.numeric(args[i + 1])
+  }
+  if (args[i] %in% c("-nsim", "--nsim") && i + 1 <= length(args)) {
+    nsim <- as.integer(args[i + 1])
   }
 }
 
@@ -78,12 +107,11 @@ if (input_type == "amrfinder") {
   cat("Processing AMR Table (amrfinder)...\n")
   amr <- read.delim(amr_table_file, sep = "\t")
   cat("AMR Table Loaded!\n")
-  #print(head(amr))  # Just to check if the file is loaded correctly
 }
-
 
 timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")  # Get the current timestamp
 output_dir <- file.path("emergene_results", sprintf("run_%s", timestamp))  # Create folder name based on timestamp
+
 
 
 # Create the timestamped folder
@@ -91,21 +119,23 @@ cat("Creating results directory: ", output_dir, "\n")
 dir.create(output_dir, recursive = TRUE)
 
 
-#amrtable<-args[2]
+sub_dir <- file.path(output_dir, "single_traits")
+
+# Create the subfolder
+dir.create(sub_dir, recursive = TRUE, showWarnings = FALSE)
 
 
 
-#tr <- read.tree("github_try/input/SNP_alignment.treefile")
 tr <- read.tree(tree_file)
+
 
 tree<-di2multi(tr) # remove multifurcations
 
-#mm<-read.delim("github_try/input/summary_resistance_virulence.txt",sep = "\t")
 
 mm<-read.delim(amr_table_file, sep = "\t")
 
+mm<-mm[which(mm$X..Coverage.of.reference.sequence>=amr_coverage & mm$X..Identity.to.reference.sequence>=amr_identity),]
 
-mm<-mm[which(mm$X..Coverage.of.reference.sequence==100 & mm$X..Identity.to.reference.sequence>99),]
 
 mm$Name<-gsub(".fna", "",mm$Name)
 mm$Name<-gsub(".fasta", "",mm$Name)
@@ -116,16 +146,14 @@ nmost<-as.data.frame(table(mm$Gene.symbol))
 ### minimum occurrence in df
 nmost<-nmost[nmost$Freq>=5,"Var1"]
 
-#nmost<-c("blaOXA-69")
+
 
 for (amr in nmost) {
-
 
   df_coal_total<-data.frame()
   
   df<-mm[which(mm$Gene.symbol == amr),]
   
-  # print (dim(df)) 
   res_df<-table(df$Name, df$Gene.symbol)
   
   res<-data.frame(row.names = tree$tip.label)
@@ -146,15 +174,15 @@ for (amr in nmost) {
   cat("Analysed gene:", amr, "\n")
     
     sink(tempfile())
-    simmap_Q <- make.simmap(
+    simmap_Q <- suppressMessages(make.simmap(
       tree, xx,
       model = "ARD",
       tips = TRUE,
       pi = "estimated",
       nsim = 1
-    )
+    ))
     sink()
-    
+     
     Q <- simmap_Q$Q
     
     sink(tempfile())
@@ -163,11 +191,12 @@ for (amr in nmost) {
       model = "ARD",
       tips = TRUE,
       pi = "estimated",
-      nsim = 100,
+      nsim = nsim,
       Q = Q
     )
     sink()
         
+   
     
     simmap<-summary(simmap_mod)
     
@@ -182,7 +211,7 @@ for (amr in nmost) {
     
     ancstats_tips<-ancstats_all[-which(rownames(ancstats_all) %in% ancstats_nodes$node),]
     
-    ancstats_tips$node<-1:(length(tree$tip.label))
+    ancstats_tips$node<-1:length(tree$tip.label)
     
     ancstats<-rbind.data.frame(ancstats_tips, ancstats_nodes)
     
@@ -226,9 +255,9 @@ for (amr in nmost) {
       
       poly_parents_with_R_descendant <- c() 
       
+      capture.output({
       get_poly_parents_with_R_descendant <- function(tree, poly_parents, pheno_nodes) {
-        
-        
+           
         for (n in seq_along(poly_parents)) {
           
           
@@ -278,7 +307,7 @@ for (amr in nmost) {
         
       }
       
-      
+      })
       
       poly_parents_with_R_descendant<-get_poly_parents_with_R_descendant(tree, poly_parents, pheno_nodes)
       # 
@@ -493,6 +522,7 @@ for (amr in nmost) {
         
         singletons<-c()
         
+       capture.output({
         
         sm<-c()
         
@@ -639,7 +669,11 @@ for (amr in nmost) {
           }
           
         }
-        
+       
+        }) 
+       
+ 
+	capture.output({       
         singletons<-singletons[!is.na(singletons)]
         
         ###
@@ -655,26 +689,15 @@ for (amr in nmost) {
         df_clust<-as.data.frame(table(ll$cluster))
         colnames(df_clust)<-c("cluster","freq")
         
-        #n_singletons<-length(df_clust[which(df_clust$freq==1),"cluster"])
         n_singletons<-length(single_clust_id)
         
-        #    singletons<-singletons[!is.na(singletons)]
         singletons_parent<-getParent(tree, singletons)
         
+        poly_parents_granchild_singletons<-getParent(tree, single_clust_id)[!getParent(tree, single_clust_id) %in% poly_parents] 
         
+        }) 
+       
         
-        poly_parents_granchild_singletons<-getParent(tree, single_clust_id)[!getParent(tree, single_clust_id) %in% poly_parents] ### se i padri dei singleton non sono nei poli parent significa che chi è esclus
-        
-        
-        
-        # smm_single<-sum(smm,na.rm = T)+sum(emergence_rate_singleton_dist, na.rm = T)
-        # 
-        # 
-        # ### emergence rate including also the singletons
-        # # smm_single<-sum(smm,na.rm = T)+sum(singleton_dist, na.rm = T)
-        # smm_single<-sum(smm,na.rm = T)+sum(emergence_rate_singleton_dist, na.rm = T)
-        # # 
-        # 
         clust_tips<-length(res_nodes_leaves[res_nodes_leaves %in% ll$id])
         
         n_singletons<-length(singletons)
@@ -963,16 +986,17 @@ for (amr in nmost) {
               df_coal_total[p, "node_lineages"]<-lineages_per_interval
               df_coal_total[p, "tip_lineages"]<-descend_tips_trait
               df_coal_total[p, "poly_parent"]<-poly_parents[p]
-              df_coal_total[p, "polyphyly"]<-polyphyly-n_singletons
-              df_coal_total[p, "coalescent_interval"]<-time_node_diff
-              df_coal_total[p, "poly_parent_nodeheight"]<-nodeheight(tree, poly_parents[p])
+              df_coal_total[p, "phyletic_events"]<-polyphyly-n_singletons
+              df_coal_total[p, "coalescent_interval"]<-round(time_node_diff,5)
+              df_coal_total[p, "poly_parent_nodeheight"]<-round(nodeheight(tree, poly_parents[p]),5)
               df_coal_total[p, "entry_rate"]<-entry_rate
-              df_coal_total[p, "R_vs_S_prop"]<-R_vs_S
+              df_coal_total[p, "R_vs_S_prop"]<-round(R_vs_S,3)
               df_coal_total[p, "poly_parent_state_prob"]<-ancstats[which(ancstats$node %in% poly_parents[p]),"S"]
               df_coal_total[p, "emergence_rate"]<-smm[p]
               df_coal_total<-df_coal_total[!is.na(df_coal_total$emergence_rate),]
               
-              write.csv(df_coal_total, sprintf("%s/%s.csv", output_dir,amr))
+              
+              write.csv(df_coal_total, sprintf("%s/%s.csv", sub_dir,amr))
               
               
             } 
@@ -990,3 +1014,59 @@ for (amr in nmost) {
   
   
 } #amr pool
+
+
+
+
+filelist<-list.files(path = sprintf("%s", sub_dir), pattern = "\\csv$",full.names = TRUE)
+
+df_input_list <- lapply(filelist, read.csv)
+
+df<-rbindlist(df_input_list, fill = T)
+
+df$X<-NULL
+
+
+df <- df %>% 
+  filter(
+    tip_lineages >= min_clade_tips,
+    poly_parent_state_prob >= min_node_state_prob
+  )
+
+df<-unique(df)
+
+
+write.csv(df, sprintf("%s/summary.csv", output_dir) ,row.names = F, quote = F)
+
+poly<-df %>%
+  group_by(amr) %>%
+  summarise(count = n(), .groups = 'drop')
+
+
+poly<-unique(poly)
+
+
+rates<-df[,c("amr", "entry_rate", "emergence_rate")]
+
+emerg_aggr<-rates[, c("amr",  "emergence_rate")]
+emerg_aggr<-unique(emerg_aggr)
+
+emerg_aggr<-aggregate(emerg_aggr$emergence_rate, by=list(amr=emerg_aggr$amr), FUN=sum)
+colnames(emerg_aggr)<-c("amr", "emergence_rate")
+
+
+entry_aggr<-rates[, c("amr",  "entry_rate")]
+entry_aggr<-unique(entry_aggr)
+
+entry_aggr<-aggregate(entry_aggr$entry_rate, by=list(amr=entry_aggr$amr), FUN=sum)
+colnames(entry_aggr)<-c("amr", "entry_rate")
+
+#mm<-cbind.data.frame(poly, entry_aggr[,2], emerg_aggr[,2])
+
+df_list <- list(poly, entry_aggr, emerg_aggr)
+mm <- Reduce(function(x, y) merge(x, y, by = "amr", all = TRUE), df_list)
+
+colnames(mm)<-c("trait", "phyletic_events", "entry_rate", "emergence_rate")
+
+write.csv(mm, sprintf("%s/aggregated_rates.csv", output_dir),row.names = F, quote = F)
+
