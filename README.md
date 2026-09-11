@@ -26,13 +26,14 @@ git clone https://github.com/gbatbiff/Emergene.git
 cd EMERGENe/
 conda env create -f environment.yml
 conda activate EMERGENe
+bash install.sh
 ```
 ## Quick guide
 The standard inputs are a time scaled phylogenetic tree (Bacdating, BEAST...), and the output from AMRFinder
 
 The command with default settings is:
 ```bash
-Rscript EMERGENe.R -t [treefile] -amr [AMRFinderPlus_output_table]
+EMERGENe -t [treefile] -amr [AMRFinderPlus_output_table]
 ```
 ## Filtering options
 
